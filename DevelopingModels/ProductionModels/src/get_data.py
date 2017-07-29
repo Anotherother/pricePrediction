@@ -1,13 +1,13 @@
 import sqlalchemy
 import pandas as pd
 
+# scripts for parsind pada using Postgres database
 
 def connect(user, password, db, host: str, port: int, echo=False):
     url = 'postgresql+psycopg2://{}:{}@{}:{}/{}'
     url = url.format(user, password, host, port, db)
     eng = sqlalchemy.create_engine(url, client_encoding='utf8', echo=echo)
     meta = sqlalchemy.MetaData(bind=eng)
-
     return eng, meta
 
 def get_data_frame(pair: str = 'USDT_BTC', exchange: str = 'poloniex') -> pd.DataFrame:

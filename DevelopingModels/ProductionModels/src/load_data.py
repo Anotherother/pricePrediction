@@ -29,6 +29,7 @@ def load_data(X, seq_len, train_size=0.9, TrainTest = False):
         return x_train, y_train
         
     if TrainTest ==True:
+
         train_split = int(round(train_size * data.shape[0]))
         train_data = data[:train_split, :]
 

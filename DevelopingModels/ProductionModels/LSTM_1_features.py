@@ -5,13 +5,12 @@ from sklearn.preprocessing import MinMaxScaler
 import pandas as pd
 import datetime 
 
-from keras.callbacks import History 
+#from keras.callbacks import History
 from keras.layers.core import Dense, Activation, Dropout
 from keras.layers.recurrent import LSTM
 from keras.models import Sequential, load_model, save_model
 
 import time
-from sklearn import metrics
 
 
 WINDOW = 22
@@ -80,7 +79,7 @@ def nextDayPrediction(typeBlockchain, stock):
     
     pathModel = "../../models/model_5f_" + typeBlockchain + today +".h5"
     save_model(model, pathModel)
-    
+    #load_model(pathModel)
    # one day prediction. get last batch known data (now we didnt need in y value and can predict it)    
     lastbatch = np.array(x[-WINDOW:])
     pred = model.predict([lastbatch.reshape(1,22, 5)])
