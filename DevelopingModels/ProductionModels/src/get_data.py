@@ -1,7 +1,6 @@
 import sqlalchemy
 import pandas as pd
 
-# Набор функций для работы с БД
 
 def connect(user, password, db, host: str, port: int, echo=False):
     url = 'postgresql+psycopg2://{}:{}@{}:{}/{}'
