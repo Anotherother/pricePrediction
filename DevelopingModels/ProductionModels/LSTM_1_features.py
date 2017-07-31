@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 import pandas as pd
 import datetime 
+from keras import backend as K
 
 #from keras.callbacks import History
 from keras.layers.core import Dense, Activation, Dropout
@@ -91,6 +92,7 @@ def nextDayPrediction(typeBlockchain, stock):
     currentData = datetime.date(int(lastDate[0]),int(lastDate[1]),int(lastDate[2])) + datetime.timedelta(1)
     predictionDate = pd.date_range(currentData, periods=1)
     prediction = pd.DataFrame(pred, columns=["predictionPrice"], index = predictionDate.values)
-
+    
+    K.clear_session()
 
     return prediction

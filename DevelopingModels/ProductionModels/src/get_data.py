@@ -12,7 +12,7 @@ def connect(user, password, db, host: str, port: int, echo=False):
 
 def get_data_frame(pair: str = 'USDT_BTC', exchange: str = 'poloniex') -> pd.DataFrame:
 
-    engine, meta = connect(user='postgres', password='password', db='btc_dev', host='94.230.125.199', port=16432)
+    engine, meta = connect(user='postgres', password='password', db='btccandles', host='94.230.125.199', port=16432)
     df = pd.read_sql_query(
         "SELECT date, time, open, close, low, high, volume, pair.\"name\""
         "FROM candlestick, pair, exchange WHERE candlestick.exchange_id = exchange.id "

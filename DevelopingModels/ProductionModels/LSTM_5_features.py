@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 import pandas as pd
 import datetime 
+from keras import backend as K 
 
 from keras.callbacks import History 
 from keras.layers.core import Dense, Activation, Dropout
@@ -81,7 +82,7 @@ def nextDayPrediction(typeBlockchain, stock):
     pathModel = "../../models/model_5f_" + typeBlockchain + today +".h5"
     save_model(model, pathModel)
     
-   # one day prediction. get last batch known data (now we didnt need in y value and can predict it)    
+    # one day prediction. get last batch known data (now we didnt need in y value and can predict it)   
     lastbatch = np.array(x[-WINDOW:])
     pred = model.predict([lastbatch.reshape(1,22, 5)])
     pred =  np.array(y_scaler.inverse_transform(pred)) # predicted value
@@ -93,5 +94,7 @@ def nextDayPrediction(typeBlockchain, stock):
     predictionDate = pd.date_range(currentData, periods=1)
     prediction = pd.DataFrame(pred, columns=["predictionPrice"], index = predictionDate.values)
 
-
+    print (prediction)
+    K.clear_session()
+    
     return prediction
