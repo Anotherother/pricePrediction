@@ -62,7 +62,7 @@ def nextDayPrediction(typeBlockchain, stock):
     GSPC = IdexDataframe("GSPC")
     IXK = IdexDataframe("IXK")
 
-    loaded = get_data.get_data_frame()
+    loaded = get_data.get_data_frame(typeBlockchain, stock)
     loaded.index = loaded.date
 
     loaded = loaded[['open', 'close', 'low', 'high', 'volume']]
