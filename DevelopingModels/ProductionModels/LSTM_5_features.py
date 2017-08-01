@@ -82,6 +82,12 @@ def nextDayPrediction(typeBlockchain, stock):
     pathModel = "../../models/model_5f_" + typeBlockchain + today +".h5"
     save_model(model, pathModel)
     
+    del model
+    
+    K.clear_session()
+
+    model = load_model(pathModel)
+    
     # one day prediction. get last batch known data (now we didnt need in y value and can predict it)   
     lastbatch = np.array(x[-WINDOW:])
     pred = model.predict([lastbatch.reshape(1,22, 5)])
@@ -95,6 +101,6 @@ def nextDayPrediction(typeBlockchain, stock):
     prediction = pd.DataFrame(pred, columns=["predictionPrice"], index = predictionDate.values)
 
     print (prediction)
-    K.clear_session()
+
     
     return prediction

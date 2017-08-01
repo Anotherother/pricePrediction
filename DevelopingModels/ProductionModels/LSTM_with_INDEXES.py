@@ -25,7 +25,7 @@ def IdexDataframe(name):
     
     INDEXValue = data.DataReader("^"+name, 'yahoo', start, end)
     INDEXValue = pd.DataFrame(data =INDEXValue, index=pd.DatetimeIndex(start=start,
-                    end=dt.datetime.today(), freq='D'))
+                    end=dt.datetime.today()- datetime.timedelta(1), freq='D'))
     
     INDEXValue.columns = ['Open' + name, 'High' + name,\
                                         'Low' + name,  'Close' + name,\
@@ -70,7 +70,7 @@ def nextDayPrediction(typeBlockchain, stock):
     df = df.fillna(method='ffill')
     df = df.dropna(axis = 1, thresh=10)
     df = df.dropna(axis = 0, thresh=10)
-    df = df[:-1]
+
     x_scaler = MinMaxScaler()
     y_scaler = MinMaxScaler()
 
@@ -100,7 +100,7 @@ def nextDayPrediction(typeBlockchain, stock):
     
     start = time.time()
     
-    model.fit(X_train, y_train, batch_size=32, epochs=10, verbose=1)
+    model.fit(X_train, y_train, batch_size=32, epochs=500, verbose=1)
     end = time.time()
 
     print ('Learning time: ', end-start)
@@ -109,14 +109,18 @@ def nextDayPrediction(typeBlockchain, stock):
     
     pathModel = "../../models/model_5f_" + typeBlockchain + today +".h5"
     save_model(model, pathModel)
+    
+    del model
+    
+    K.clear_session()
+
+    model = load_model(pathModel)
     #model = load_model(pathModel)
     # one day prediction. get last batch known data (now we didnt need in y value and can predict it)    
     lastbatch = np.array(x[-WINDOW:])
     pred = model.predict([lastbatch.reshape(1,22, num_features)])
     pred =  np.array(y_scaler.inverse_transform(pred)) # predicted value
     prediction = pred.reshape(-1)
-
-    K.clear_session()
     
     print (prediction)
 
