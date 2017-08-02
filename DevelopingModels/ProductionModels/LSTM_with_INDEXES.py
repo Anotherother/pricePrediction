@@ -20,18 +20,14 @@ from sklearn import metrics
 WINDOW = 22
 
 def IdexDataframe(name):
-    start = dt.datetime(2015,8,1)
-    end = dt.datetime.today()
+    INDEXED = get_data.get_specific_data_frame(name, "yahoo")
     
-    INDEXValue = data.DataReader("^"+name, 'yahoo', start, end)
-    INDEXValue = pd.DataFrame(data =INDEXValue, index=pd.DatetimeIndex(start=start,
-                    end=dt.datetime.today()- datetime.timedelta(1), freq='D'))
-    
-    INDEXValue.columns = ['Open' + name, 'High' + name,\
-                                        'Low' + name,  'Close' + name,\
-                                        'Adj Close' + name,'Volume' + name]
-    INDEXValue = INDEXValue.fillna(method='ffill')                   
-    return INDEXValue
+    INDEXED.index = INDEXED.date
+    INDEXED = INDEXED[['open','close','low','high','volume','adj_close']]
+    INDEXED.columns = ['Open' + name, 'High' + name,\
+               'Low' + name,  'Close' + name,\
+               'Adj Close' + name,'Volume' + name]
+    return INDEXED
 
 def build_model(input_shape):
     
