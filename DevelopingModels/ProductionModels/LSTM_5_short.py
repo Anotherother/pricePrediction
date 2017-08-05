@@ -36,68 +36,78 @@ def build_model(input_shape):
     return model
 
 
-def nextDayPrediction(typeBlockchain, stock):    
+def nextDayPrediction(typeBlockchain, stock):   
 
     
-    df = get_data.get_data_frame(typeBlockchain, stock)
+     df = pd.read_csv('../../data/5_minutes_dump.csv') # ШОРТЫ
 
+    df.columns = ['open', 'close','low', 'high', 'volume', 'date_time', 'ex', 'typeBlockchain']
+    df.index = df.date_time
+    df = df.sort_index()
+    
     x_scaler = MinMaxScaler()
     y_scaler = MinMaxScaler()
 
     all_df = df.copy()
-    features = ['low', 'high']
-    
-    x = all_df[features].copy()
+
+    x = all_df[['open', 'low', 'high', 'volume']].copy()
     
     y = all_df['close'].copy()
     
-    #x = pd.ewma(x,2)
-    #y = pd.ewma(y,2)
+    x = pd.ewma(x,2)
+    y = pd.ewma(y,2)
     
-    NUM_FEATURES = x.shape[1]
-    
-    x[features] = x_scaler.fit_transform(x)
+    x[['open', 'low', 'high', 'volume']] = x_scaler.fit_transform(x)
 
     y = y_scaler.fit_transform(y.values.reshape(-1, 1))
-    #x['close'] = y
+
     
-    #X_train, y_train = load.load_data(x, WINDOW, TrainTest = False)
+    shape = x.shape[1]
+    #X_train, y_train = load.load_data(x, WINDOW, TrainTest = False) # не удалять, чтобы переключить на сбор данных только трейна
     X_train, y_train, X_test, y_test = load.load_data(x, WINDOW, train_size= 0.96, TrainTest = True)
     
-    model = build_model(input_shape=(WINDOW, NUM_FEATURES))
+    model = build_model(input_shape=(WINDOW, shape))
     
     print('START FIT MODEL...')
     
     start = time.time()
     
-    #history = History()
-    #history= model.fit(X_train, y_train, validation_data=(X_test, y_test),  batch_size=32, epochs=500,verbose=0,
+    history = History()
+    history= model.fit(X_train, y_train, validation_data=(X_test, y_test),  batch_size=128, epochs=200,verbose=1,
               callbacks=[history])
     
-    model.fit(X_train, y_train, batch_size=32, epochs=500, verbose=1)
+    #model.fit(X_train, y_train, batch_size=128, epochs=200, verbose=1)# не удалять, чтобы переключить наобучение  только трейна
     end = time.time()
 
     print ('Learning time: ', end-start)
     
     today = time.strftime("_%d_%m_%Y")
     
-    pathModel = "../../models/model_low_high_" + typeBlockchain + today +".h5"
+    pathModel = "../../models/model_5fshort_" + typeBlockchain + today +".h5"
     save_model(model, pathModel)
     
-    #model = load_model(pathModel)
-    # one day prediction. get last batch known data (now we didnt need in y value and can predict it)    
+    
+    del model
+    
+    K.clear_session()
+
+    model = load_model(pathModel)
+
     lastbatch = np.array(x[-WINDOW:])
-    pred = model.predict([lastbatch.reshape(1,22, NUM_FEATURES)])
+    pred = model.predict([lastbatch.reshape(1,WINDOW, shape)])
     pred =  np.array(y_scaler.inverse_transform(pred)) # predicted value
 
-    # now we make dataframe and create row names in date
+    splitStr = str(df.date_time[df.last_valid_index()]).split(' ')
+    lastDate =splitStr[0].split('-')
+    lastTime = splitStr[1].split(':')
 
-    lastDate =str(df.date[df.last_valid_index()]).split('-')
-    currentData = datetime.date(int(lastDate[0]),int(lastDate[1]),int(lastDate[2])) + datetime.timedelta(1)
-    predictionDate = pd.date_range(currentData, periods=1)
+    predictionDate = datetime.datetime(int(lastDate[0]),int(lastDate[1]),int(lastDate[2]),\
+                                    int(lastTime[0]), int(lastTime[1]))  + datetime.timedelta(minutes=5)
+
+    predictionDate = pd.date_range(predictionDate, periods=1)
+
     prediction = pd.DataFrame(pred, columns=["predictionPrice"], index = predictionDate.values)
 
     print (prediction)
-
     
     return prediction
