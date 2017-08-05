@@ -42,7 +42,5 @@ def load_data(X, seq_len, train_size=0.9, TrainTest = False):
         x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], amount_of_features))
         x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], amount_of_features))  
 
-        return x_train, y_train, x_test, y_test
 
-    
-
+        return x_train[:,:,:-1], y_train, x_test[:,:,:-1], y_test
