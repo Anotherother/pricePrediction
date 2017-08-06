@@ -50,19 +50,19 @@ def nextDayPrediction(typeBlockchain, stock):
     
     y = all_df['close'].copy()
     
-    # if we want smooth data
-    
     x = pd.ewma(x,2)
     y = pd.ewma(y,2)
     x[['open', 'low', 'high', 'volume']] = x_scaler.fit_transform(x)
-
+    NUM_FEATURES = x.shape[1]
+    
     y = y_scaler.fit_transform(y.values.reshape(-1, 1))
     x['close'] = y
     
-    X_train, y_train = load.load_data(x, WINDOW, TrainTest = False)
-    #X_train, y_train, X_test, y_test = load.load_data(x, WINDOW, train_size= 0.95, TrainTest = True)
+    #X_train, y_train = load.load_data(x, WINDOW, TrainTest = False)
+    X_train, y_train, X_test, y_test = load.load_data(x, WINDOW, train_size= 0.96, TrainTest = True)
+    x = x[['open', 'low', 'high', 'volume']]
     
-    model = build_model(input_shape=(WINDOW, 5))
+    model = build_model(input_shape=(WINDOW, NUM_FEATURES))
     
     print('START FIT MODEL...')
     
@@ -82,15 +82,11 @@ def nextDayPrediction(typeBlockchain, stock):
     pathModel = "../../models/model_5f_" + typeBlockchain + today +".h5"
     save_model(model, pathModel)
     
-    del model
-    
-    K.clear_session()
-
-    model = load_model(pathModel)
+    #model = load_model(pathModel)
     
     # one day prediction. get last batch known data (now we didnt need in y value and can predict it)   
     lastbatch = np.array(x[-WINDOW:])
-    pred = model.predict([lastbatch.reshape(1,22, 5)])
+    pred = model.predict([lastbatch.reshape(1,WINDOW, NUM_FEATURES)])
     pred =  np.array(y_scaler.inverse_transform(pred)) # predicted value
 
     # now we make dataframe and create row names in date
@@ -100,7 +96,10 @@ def nextDayPrediction(typeBlockchain, stock):
     predictionDate = pd.date_range(currentData, periods=1)
     prediction = pd.DataFrame(pred, columns=["predictionPrice"], index = predictionDate.values)
 
-    print (prediction)
 
+    print (prediction)
+    del model
+    
+    K.clear_session()
     
     return prediction
