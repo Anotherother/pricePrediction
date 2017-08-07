@@ -40,6 +40,7 @@ def nextDayPrediction(typeBlockchain, stock):
 
     
     df = get_data.get_data_frame(typeBlockchain, stock)
+    df.index = df.date
 
     x_scaler = MinMaxScaler()
     y_scaler = MinMaxScaler()
@@ -51,19 +52,19 @@ def nextDayPrediction(typeBlockchain, stock):
     
     y = all_df['close'].copy()
     
-    #x = pd.ewma(x,2)
-    #y = pd.ewma(y,2)
+    x = pd.ewma(x,2)
+    y = pd.ewma(y,2)
     
     NUM_FEATURES = x.shape[1]
     
     x[features] = x_scaler.fit_transform(x)
 
     y = y_scaler.fit_transform(y.values.reshape(-1, 1))
-    #x['close'] = y
+    x['close'] = y
     
     #X_train, y_train = load.load_data(x, WINDOW, TrainTest = False)
     X_train, y_train, X_test, y_test = load.load_data(x, WINDOW, train_size= 0.96, TrainTest = True)
-    
+    x = x[features]
     model = build_model(input_shape=(WINDOW, NUM_FEATURES))
     
     print('START FIT MODEL...')
@@ -72,7 +73,7 @@ def nextDayPrediction(typeBlockchain, stock):
     
     #history = History()
     #history= model.fit(X_train, y_train, validation_data=(X_test, y_test),  batch_size=32, epochs=500,verbose=0,
-              callbacks=[history])
+    #          callbacks=[history])
     
     model.fit(X_train, y_train, batch_size=32, epochs=500, verbose=1)
     end = time.time()
@@ -87,12 +88,12 @@ def nextDayPrediction(typeBlockchain, stock):
     #model = load_model(pathModel)
     # one day prediction. get last batch known data (now we didnt need in y value and can predict it)    
     lastbatch = np.array(x[-WINDOW:])
-    pred = model.predict([lastbatch.reshape(1,22, NUM_FEATURES)])
+    pred = model.predict([lastbatch.reshape(1,WINDOW, NUM_FEATURES)])
     pred =  np.array(y_scaler.inverse_transform(pred)) # predicted value
 
     # now we make dataframe and create row names in date
 
-    lastDate =str(df.date[df.last_valid_index()]).split('-')
+    lastDate =str(df.last_valid_index()).split('-')
     currentData = datetime.date(int(lastDate[0]),int(lastDate[1]),int(lastDate[2])) + datetime.timedelta(1)
     predictionDate = pd.date_range(currentData, periods=1)
     prediction = pd.DataFrame(pred, columns=["predictionPrice"], index = predictionDate.values)

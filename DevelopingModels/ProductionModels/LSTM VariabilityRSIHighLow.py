@@ -103,25 +103,31 @@ def nextDayPrediction(typeBlockchain, stock):
 
     df = get_data.get_data_frame(typeBlockchain, stock)
     df.index = df.date
+    
     RSI1, RSI2 = computeRSI(df)
     
     featurevector  = pd.concat([df.date, RSI1, RSI2, variab, df.close, df.high, df.low], axis = 1)
     featurevector.columns = ['date','RSI1', 'RSI2', 'variability', 'close', 'high', 'low']
     featurevector = featurevector.dropna()
     df = featurevector
-    features = [ 'RSI1', 'RSI2', 'variability',  'high', 'low']
+    features = [ 'RSI1','RSI2', 'variability',  'high', 'low']
     x_scaler = MinMaxScaler()
     y_scaler = MinMaxScaler()
 
     x = featurevector[features].copy()    
     y = featurevector['close'].copy()
-
+    
+    
     NUM_FEATURES = x.shape[1]
     
     x[features] = x_scaler.fit_transform(x)
-
     y = y_scaler.fit_transform(y.values.reshape(-1, 1))
-    X_train, y_train = load.load_data(x, WINDOW, TrainTest = False)
+    x['close'] = y
+    
+    
+    X_train, y_train, X_test, y_test = load.load_data(x, WINDOW, train_size= 0.96, TrainTest = True)
+    
+    x = x[features]
     
     model = build_model(input_shape=(WINDOW, NUM_FEATURES))
     
@@ -133,7 +139,7 @@ def nextDayPrediction(typeBlockchain, stock):
     #history= model.fit(X_train, y_train, validation_data=(X_test, y_test),  batch_size=32, epochs=100,verbose=1,
     #          callbacks=[history])
     
-    model.fit(X_train, y_train, batch_size=32, epochs=500, verbose=1)
+    model.fit(X_train, y_train, batch_size=32, epochs=500, verbose=0)
     end = time.time()
 
     print ('Learning time: ', end-start)
