@@ -103,3 +103,9 @@ def adx(df, period=14):
     ADX = pd.DataFrame(wilder_smooth(DX, period), index=df.index, columns=['adx_{}'.format(period)])
 
     return df.join(ADX)
+
+def volatility(df):
+    volatility = pd.DataFrame(df.close).rolling(WINDOW).std().values.tolist()
+    volatility = [v[0] for v in volatility]
+    v = pd.DataFrame(data = volatility, columns = ['volatility'])
+    return df.join(v)
