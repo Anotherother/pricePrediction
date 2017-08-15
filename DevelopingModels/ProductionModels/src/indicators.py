@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 
+WINDOW = 22
+
 def wilder_smooth(value_list, period):
     nan_offset = np.isnan(value_list).sum()
     smoothened = [np.nan for i in range(period-1+nan_offset)]
@@ -107,5 +109,5 @@ def adx(df, period=14):
 def volatility(df):
     volatility = pd.DataFrame(df.close).rolling(WINDOW).std().values.tolist()
     volatility = [v[0] for v in volatility]
-    v = pd.DataFrame(data = volatility, columns = ['volatility'])
+    v = pd.DataFrame(data = volatility, columns = ['volatility'], index=df.index)
     return df.join(v)
