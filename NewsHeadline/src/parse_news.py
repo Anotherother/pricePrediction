@@ -2,7 +2,7 @@ import requests
 from pyquery import PyQuery
 import pandas as pd
 
-def crawl_bitcoin(no_of_last_pages=325):
+def crawl_bitcoin(no_of_last_pages=370):
     print ('parsing bitcoin')
     headers = { 'Accept-Encoding': 'identity' }
 
@@ -25,7 +25,9 @@ def crawl_bitcoin(no_of_last_pages=325):
 
         print ('news.bitcoin.com: ' + str(len(articles)) + ' articles has been extracted.')
 
-    return pd.DataFrame(articles)
+    articles = pd.DataFrame(articles)
+    articles.to_csv('./data/news_bitcoin_com.csv')
+    return articles
 
 def crawl_coindesk():
     headers = {'Accept-Encoding': 'identity'}
@@ -44,7 +46,9 @@ def crawl_coindesk():
         article = {'url': url, 'title': title, 'time': time}
         articles.append(article)
 
-    return pd.DataFrame(articles)
+    articles = pd.DataFrame(articles)
+    articles.to_csv('./data/coindesk.csv')
+    return articles
 
 
 def crawl_cryptocoinnews(section, no_of_last_pages):
@@ -52,6 +56,7 @@ def crawl_cryptocoinnews(section, no_of_last_pages):
     headers = {'Accept-Encoding': 'identity'}
 
     no_of_news = 0
+    article_pandas = pd.DataFrame({'url': [], 'title': [], 'time': []})
     for index in range(1, no_of_last_pages):
 
         r = requests.get("https://www.cryptocoinsnews.com/" + section + "/page/" + str(index), headers=headers)
@@ -60,8 +65,8 @@ def crawl_cryptocoinnews(section, no_of_last_pages):
         post_wrapper_tag = 'type-post'
         postTags = pq('div.' + post_wrapper_tag)
 
-        print('Crawled page ' + str(index) + ': Extracted ' + str(len(postTags)))
-        article_pandas = pd.DataFrame({'url': [], 'title': [], 'time': []})
+        print('parse page ' + str(index) + ': Extracted ' + str(len(postTags)))
+
         for postTag in postTags:
             postTagObj = PyQuery(postTag)
 
@@ -75,5 +80,5 @@ def crawl_cryptocoinnews(section, no_of_last_pages):
             no_of_news = no_of_news + 1
             article_pandas = article_pandas.append(pd.DataFrame([article], columns=['url', 'title', 'time']))
         print('cryptocoinnews.com: ' + str(no_of_news) + ' articles has been extracted.')
-
+    article_pandas.to_csv('./data/cryptocoinnews.csv')
     return article_pandas
