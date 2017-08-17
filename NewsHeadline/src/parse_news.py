@@ -20,13 +20,13 @@ def crawl_bitcoin(no_of_last_pages=370):
             time =  postTagObj('time').attr('datetime')
             url =  postTagObj('div > h3 > a').attr('href')
             title = postTagObj('div > h3 > a').text()
-            article = { "url": url, "title": title.encode("utf-8"), "time": time }
+            article = { "url": url, "title": title.encode("utf-8")  , "time": time }
             articles.append(article)
 
         print ('news.bitcoin.com: ' + str(len(articles)) + ' articles has been extracted.')
 
     articles = pd.DataFrame(articles)
-    articles.to_csv('./data/news_bitcoin_com.csv')
+    articles.to_csv('./data/news_bitcoin_com.csv', encoding='utf-8')
     return articles
 
 def crawl_coindesk():
@@ -47,11 +47,11 @@ def crawl_coindesk():
         articles.append(article)
 
     articles = pd.DataFrame(articles)
-    articles.to_csv('./data/coindesk.csv')
+    articles.to_csv('./data/coindesk.csv', encoding='utf-8')
     return articles
 
 
-def crawl_cryptocoinnews(section, no_of_last_pages):
+def crawl_cryptocoinnews(section, no_of_last_pages, output_filename):
     print('parsing cryptocoinnews.com/' + section)
     headers = {'Accept-Encoding': 'identity'}
 
@@ -72,13 +72,17 @@ def crawl_cryptocoinnews(section, no_of_last_pages):
 
             splitted_date = postTagObj('span.date').text().split('/')
 
-            time = str(splitted_date[2]) + '-' + str(splitted_date[1]) + '-' + str(splitted_date[0]) + 'T00:00:00+00:00'
+            time = str(splitted_date[2]) + '-' + str(splitted_date[1])\
+                                         + '-' + str(splitted_date[0])\
+
             url = postTagObj('div > h3 > a').attr('href')
-            title = postTagObj('div > h3 > a').text()#.attr('title')
-            article = {"url": url, "title": title.encode("utf-8"), "time": time}
+            title = postTagObj('div > h3 > a').text()
+            article = {"url": url, "title": title.encode('utf-8'), "time": time}
 
             no_of_news = no_of_news + 1
-            article_pandas = article_pandas.append(pd.DataFrame([article], columns=['url', 'title', 'time']))
+            article_pandas = article_pandas.append(pd.DataFrame(data = [article], columns=['url', 'title', 'time']))
+
         print('cryptocoinnews.com: ' + str(no_of_news) + ' articles has been extracted.')
-    article_pandas.to_csv('./data/cryptocoinnews.csv')
+
+    article_pandas.to_csv('./data/' + output_filename + '.csv', encoding='utf-8')
     return article_pandas
