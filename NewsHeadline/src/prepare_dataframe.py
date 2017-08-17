@@ -2,7 +2,6 @@
 import pandas as pd
 import datetime as dt
 
-
 def read_csv_dataframe(filename):
 
     data = pd.read_csv(filename)
@@ -41,6 +40,7 @@ def averageSintimentEveryDay(dataframe):
         returned_df['pos'].append(df_new['pos'])
 
         # Если нужно будет заполнять метками по compuund = раскоментить
+
         #returned_df['neg'].append(\
         #    df_new[df_new["compound"] < -0.5].shape[0] / df_new.shape[0])
         #returned_df['neu'].append(\

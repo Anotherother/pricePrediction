@@ -51,7 +51,7 @@ def crawl_coindesk():
     return articles
 
 
-def crawl_cryptocoinnews(section, no_of_last_pages):
+def crawl_cryptocoinnews(section, no_of_last_pages, output_filename):
     print('parsing cryptocoinnews.com/' + section)
     headers = {'Accept-Encoding': 'identity'}
 
@@ -72,7 +72,8 @@ def crawl_cryptocoinnews(section, no_of_last_pages):
 
             splitted_date = postTagObj('span.date').text().split('/')
 
-            time = str(splitted_date[2]) + '-' + str(splitted_date[1]) + '-' + str(splitted_date[0])\
+            time = str(splitted_date[2]) + '-' + str(splitted_date[1])\
+                                         + '-' + str(splitted_date[0])\
 
             url = postTagObj('div > h3 > a').attr('href')
             title = postTagObj('div > h3 > a').text()
@@ -83,5 +84,5 @@ def crawl_cryptocoinnews(section, no_of_last_pages):
 
         print('cryptocoinnews.com: ' + str(no_of_news) + ' articles has been extracted.')
 
-    article_pandas.to_csv('./data/cryptocoinnews.csv', encoding='utf-8')
+    article_pandas.to_csv('./data/' + output_filename + '.csv', encoding='utf-8')
     return article_pandas
