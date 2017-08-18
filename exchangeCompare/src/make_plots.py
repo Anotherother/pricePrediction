@@ -31,7 +31,7 @@ def plotAsScaler(feature_1, feature_2, feature_3):
     feature_2 = f_2_scaler.fit_transform(feature_2.close)
     feature_3 = f_3_scaler.fit_transform(feature_3.close)
     
-    plotPlotly(feature_1,feature_2,feature_3,'USDT_BTC', 'USDT_ETH', 'USDT_DASH' )
+    plotPlotly_N_feature(feature_1,feature_2,feature_3,'USDT_BTC', 'USDT_ETH', 'USDT_DASH' )
     
 def plot_quality_graph(dataframe):    
     trainPredict = model.predict(X_train)
