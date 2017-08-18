@@ -19,7 +19,7 @@ def load_data(X, seq_len, train_size=0.9, TrainTest = False):
     
     if TrainTest ==False:
         x_train = data[:, :-1] # delete feature, which we want predict and add it to
-                                 # labels - y_train
+                               # labels - y_train
             
         y_train = data[:, -1][:,-1] # last index - index with value,
                                     # which we want predict. 4 - index for 'close'

@@ -37,3 +37,13 @@ def get_specific_data_frame(name, owner) -> pd.DataFrame:
     
         df = get_data_frame(name,owner)
         return df
+
+def loadHeadlines():
+    engine, meta = connect(user='postgres', password='password', \
+                           db='btccandles', host='94.230.125.199', port=16432)
+    df = pd.read_sql_query(
+        "SELECT * from parsing_news ORDER BY date DESC , time DESC", con =engine)
+
+    df.date = pd.to_datetime(df['date'])
+    df.index = df.date
+    return df

@@ -26,7 +26,7 @@ def load_data(X, seq_len, train_size=0.9, TrainTest = False):
 
         x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], amount_of_features))
 
-        return x_train, y_train
+        return x_train[:,:,:-1], y_train
         
     if TrainTest ==True:
 
