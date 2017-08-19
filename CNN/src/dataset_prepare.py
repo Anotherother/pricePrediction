@@ -1,8 +1,10 @@
 import random
 import matplotlib.pylab as plt
+import datetime
 
-WINDOW=90
-FORECAST=45
+
+WINDOW=22
+FORECAST=2
 EMB_SIZE=10
 STEP=1
 TRAIN_TEST_PERCENTAGE=0.9
@@ -110,15 +112,14 @@ def dataset(df, START=0, END=0, SLICING=0):
     def find_hour(df, hour='07:00:00'):
         vec = []
         for i in range(0,len(df.date)):
-            if(df.date[i][11:19] == hour):
-                weekday = datetime.datetime.strptime(df.loc[i, ('date')], '%d.%m.%Y %H:%M:%S.%f').weekday()
-                if(weekday!=5 and weekday !=6):
-                    vec.append(i)
+            if(str(df.date[i])[11:19] == hour):
+                weekday = df.date[i].weekday()
+                vec.append(i)
         return vec 
     
     if (SLICING==0):
         STARTS = find_hour(df,'07:00:00')
-        ENDS = find_hour(df,'20:59:00')
+        ENDS = find_hour(df,'23:59:00')
         
         return df, STARTS, ENDS
     
@@ -135,3 +136,31 @@ def dataset_check(df):
     print(df.head())
     print(df.tail())
     return STARTS, ENDS
+
+
+
+def full_df(STARTS, END, ASK_FNAME=ASK_FNAME, BID_FNAME=BID_FNAME):
+    ask_df = []
+    bid_df = []
+    for i in range(0,len(STARTS)):
+        ask_df.append(dataset(ASK_FNAME,STARTS[i],ENDS[i],SLICING=1))
+        bid_df.append(dataset(BID_FNAME,STARTS[i],ENDS[i],SLICING=1))
+            
+    ask_df= pd.concat(ask_df)
+    bid_df= pd.concat(bid_df)
+
+    deads = health_check(bid_df)
+    
+    df = pd.merge(ask_df,bid_df, on="Datetime")
+    
+    for i in xrange(len(df)):
+        df.loc[i, ('Datetime')] = datetime.datetime.strptime(df.loc[i, ('Datetime')], '%d.%m.%Y %H:%M:%S.%f')
+        if i%1000==0:
+                print ('parsing time ',i,'/',len(df.Datetime))
+    
+    print('\nDATASET CLEANED\n')
+    print(df.head())
+    print(df.tail())
+    #df_plot(df)
+    
+    return df
